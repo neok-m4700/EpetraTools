@@ -1,15 +1,7 @@
 from PyTrilinos import Epetra, EpetraExt
+from EpetraMyTools import subVector 
 import numpy as np
 
-def sub_vec(v, ind)
-     myelems=vMap.MyGlobalElements()
-     #find local_elems which are in indx
-     local_elems=[item for item in myelems if item in ind]
-     
-     xMap = Epetra.Map(-1, local_elems, 0, comm)
-     for ii in range(xMap.MyLength()):
-           x[ii] = 
- 
 comm = Epetra.PyComm()
 v = np.linspace(0,1.,10)
 
@@ -18,7 +10,7 @@ X=Epetra.Vector(xMap)
 for ii in range(X.MyLength()):
     i = xMap.GID(ii)
     X[ii] = v[i] 
-recup = X.ExtractCopy()
-x3=Epetra.Vector(recup[0:6])
+print X
+x3=subVector(X, range(6))
 print x3 
 

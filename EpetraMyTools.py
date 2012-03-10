@@ -1,5 +1,7 @@
 import numpy as np
 from PyTrilinos import Epetra
+
+
 def AddToProfile(G, indx, indy):
  iy=indy.tolist()
  for ix in indx: 
@@ -12,9 +14,9 @@ def AddMatElem(A, indx, indy, s):
   iy = indy.tolist()*m
   A.SumIntoGlobalValues(ix, iy, s)  
 
-def subVec(V, ind):
+def subVector(V, ind):
     """ construct a Vector extracted from a Vector
-    s = subCrsMatrix(V, ind) with  s[k] = V[ind[k]]
+    s = subVector(V, ind) with  s[k] = V[ind[k]]
     """
     comm =V.Comm()
     vMap = V.Map()
@@ -29,9 +31,9 @@ def subVec(V, ind):
     # the local compopents of the Map of S
     sMyElems=range(l2[myid],l2[myid]+l[myid])
     sMap = Epetra.Map(-1, sMyElems, 0, comm)
-    s=Epetra.Vector(Epetra.Copy, sMap)
+    s=Epetra.Vector(sMap)
     for i,el in enumerate(local_elems):
-         s[i] = V[el]
+         s[sMap.LID(i)] = V[vMap.LID(i)]
     return s 
 
 def subCrsMatrix(A, indx, indy):
