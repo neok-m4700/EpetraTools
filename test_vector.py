@@ -12,7 +12,7 @@ for ii in range(X.MyLength()):
     X[ii] = v[i] 
 print X
 Xs=subVector(X, range(6))
-print Xs 
+print Xs.Norm2() 
 
 Xc= Epetra.Vector(X[:6])
 print Xc

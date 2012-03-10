@@ -44,8 +44,6 @@ def bpcg(H, B, F, Qh, Qs, v0, prec, maxit, show):
     B.Multiply(False, y, r1)
     tr1 -=  r1
     tr2 = subVector(F, range(Nh, F.shape[0])) 
-    print '|tr2| = ', tr2.shape[0]
-    print 'size(B) =', B.NumGlobalRows(), B.NumGLobalCols() 
     B.Multiply(True, x, r2)
     tr2 -=  r2
 
@@ -55,10 +53,8 @@ def bpcg(H, B, F, Qh, Qs, v0, prec, maxit, show):
     Qh.Multiply(False, tr1, r1)
     B.Multiply(True, r1, r2)
     r2 -= tr2
-    
     res = sqrt(r1.Norm2()**2 + r2.Norm2()**2)
     nF = F.Norm2()
-  
 
     # pre-alloc
     z2 = Vector(y)
