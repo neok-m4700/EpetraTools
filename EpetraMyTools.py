@@ -18,22 +18,23 @@ def subVector(V, ind):
     """ construct a Vector extracted from a Vector
     s = subVector(V, ind) with  s[k] = V[ind[k]]
     """
-    comm =V.Comm()
+    comm = V.Comm()
     vMap = V.Map()
+    myid = comm.MyPID()
     myelems=vMap.MyGlobalElements()
     
     #find local_elems which are in indx
-    local_elems=[item for item in myelems if item in ind]
+    #local_elems=[item for item in myelems if item in ind]
+    local_elems =set(myelems) & set(ind)
     l = comm.GatherAll(local_elems.__len__())
     l2=[0]+l.cumsum()[:-1].tolist()
-    myid=comm.MyPID()
     
     # the local compopents of the Map of S
     sMyElems=range(l2[myid],l2[myid]+l[myid])
     sMap = Epetra.Map(-1, sMyElems, 0, comm)
     s=Epetra.Vector(sMap)
-    for i,el in enumerate(local_elems):
-         s[sMap.LID(i)] = V[vMap.LID(i)]
+    for i in range(local_elems.__len__()):
+        s[sMap.LID(i)] = V[vMap.LID(i)]
     return s 
 
 def subCrsMatrix(A, indx, indy):

@@ -11,6 +11,8 @@ for ii in range(X.MyLength()):
     i = xMap.GID(ii)
     X[ii] = v[i] 
 print X
-x3=subVector(X, range(6))
-print x3 
+Xs=subVector(X, range(6))
+print Xs 
 
+Xc= Epetra.Vector(X[:6])
+print Xc
