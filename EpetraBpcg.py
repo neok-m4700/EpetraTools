@@ -42,14 +42,12 @@ def bpcg(H, B, F, Qh, Qs, v0, prec, maxit, show):
     H.Multiply(False, x, r1)
     tr1 -=  r1
     B.Multiply(False, y, r1)
-    tr1 -=  r1o
+    tr1 -=  r1
     tr2 = subVector(F, range(Nh, F.shape[0])) 
     print '|tr2| = ', tr2.shape[0]
     print 'size(B) =', B.NumGlobalRows(), B.NumGLobalCols() 
     B.Multiply(True, x, r2)
     tr2 -=  r2
-    
-    
 
     # r0 = G r_check_0
     # with G = [inv(Qh)     0  
