@@ -16,7 +16,7 @@ mycomm = Epetra.PyComm()
 A = scipy_csr_matrix2CrsMatrix(A_csr, mycomm)
 
 #initial guess
-x0=np.zeros((N),dtype='float')
+x0=np.ones((N),dtype='float')
 X = Epetra.Vector(A.DomainMap())
 for ii in range(X.MyLength()):
     i=  X.Map().GID(ii)

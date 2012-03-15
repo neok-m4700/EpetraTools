@@ -25,16 +25,18 @@ def cg(A, x0, F, prec, maxit, show=True):
     
     x = Vector(x0)
     r = Vector(F)
-    Ax = Vector(r)
-    A.Multiply(False, x, Ax);
-    r -= Ax
+    Ap = Vector(F)
+    A.Multiply(False, x, Ap)
+    r -= Ap
     p=Vector(r)
-    rsold=r.Dot(r);
-    Ap = Vector(Ax) 
+    rsold=r.Dot(r)
     nF = F.Norm2()
     for i in range(maxit):
-        A.Multiply(False, p , Ap)
-        alpha=rsold/(p.Dot(Ap))
+	mid=A.Comm().MyPID()
+	A.Multiply(False, p , Ap)
+	print 'sur', mid , 'p =',  p
+	print 'Ap =', Ap
+	alpha=rsold/(p.Dot(Ap))
         x += alpha * p
         r -= alpha * Ap
         rsnew = r.Dot(r)
@@ -43,9 +45,7 @@ def cg(A, x0, F, prec, maxit, show=True):
 	   print '||r|| = %.3e' % n_r
 	if n_r < (prec * nF):
               break
-        p = r + rsnew/rsold * p
-        print p
+	p = r + rsnew/rsold * p
 	rsold=Vector(rsnew)
-           
     return x 
 
