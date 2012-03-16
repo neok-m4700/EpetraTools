@@ -26,7 +26,6 @@ t2 = tps.WallTime()
 if (mycomm.MyPID() == 0):
    print 'tps load A = %.3es' %  (t2-t1)
 t1 = tps.WallTime()
-As=load_mat("A.mat.npz")
 A=scipy_csr_matrix2CrsMatrix(As, mycomm)
 t2 = tps.WallTime()
 if (mycomm.MyPID() == 0):
@@ -38,7 +37,7 @@ from scipy.sparse import spdiags
 Bs=load_mat("H.mat.npz")
 B=scipy_csr_matrix2CrsMatrix(Bs, mycomm)
 Hs=load_mat("H.mat.npz")
-Qhs=spdiags(np.ones((Hs.shape[0]), dtype='float'),0 ,Hs.shape[0], Hs.shape[1]).tocsr()
+Qhs=spdiags(np.ones((Hs.shape[0]), dtype='float'), 0, Hs.shape[0], Hs.shape[1]).tocsr()
 Qh=scipy_csr_matrix2CrsMatrix(Qhs, mycomm)
 H=scipy_csr_matrix2CrsMatrix(Hs, mycomm)
 

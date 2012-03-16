@@ -30,7 +30,7 @@ def bpcg(H, B, F, Qh, Qs, v0, prec, maxit, show):
     from EpetraMyTools import subVector
     from numpy import sqrt
     Nh = H.NumGlobalCols()
-   
+    verbose = (H.Comm().MyPID==0) 
 
     x = subVector(v0, range(Nh))
     y = subVector(v0, range(Nh, v0.shape[0]))
@@ -40,23 +40,26 @@ def bpcg(H, B, F, Qh, Qs, v0, prec, maxit, show):
     # r_check_0 = f- K *v 
     tr1 = subVector(F, range(Nh))
     H.Multiply(False, x, r1)
-    tr1 -=  r1
+    tr1.Update(-1., r1, 1.)
     B.Multiply(False, y, r1)
-    tr1 -=  r1
+    tr1.Update(-1., r1, 1.)
     tr2 = subVector(F, range(Nh, F.shape[0])) 
     B.Multiply(True, x, r2)
-    tr2 -=  r2
+    tr2.Update(-1., r2, 1.)
 
     # r0 = G r_check_0
     # with G = [inv(Qh)     0  
     #           B*inv(Qh) - I]
-    Qh.Multiply(False, tr1, r1)
+    # the guilty line!
+    #Qh.Multiply(False, tr1, r1)
+    r1.Update(1., tr1, 0.)
     B.Multiply(True, r1, r2)
-    r2 -= tr2
+    r2.Update(-1., tr2, 1.)
     res = sqrt(r1.Norm2()**2 + r2.Norm2()**2)
     nF = F.Norm2()
 
     # pre-alloc
+    z1 = Vector(x)
     z2 = Vector(y)
     
     w1 = Vector(x)
@@ -66,7 +69,6 @@ def bpcg(H, B, F, Qh, Qs, v0, prec, maxit, show):
     q2 = Vector(y)
     
     d  = Vector(x)
-    print "coucou"
     ###########################################
     # MAIN LOOP
     ###########################################
@@ -74,8 +76,9 @@ def bpcg(H, B, F, Qh, Qs, v0, prec, maxit, show):
     while ((res > prec * nF) and (k <= maxit)):
          
          #solve the \tilde{K} z^k = r^k 
-         Qs.Multiply(False, r2, z2)
-         z1 = Vector(r1)
+         #Qs.Multiply(False, r2, z2)
+         z2.Update(1., r2, 0.)
+         z1.Update(1., r1, 0.)
          
          # d = H * r_1^k
          H.Multiply(False, r1, d)
@@ -83,7 +86,7 @@ def bpcg(H, B, F, Qh, Qs, v0, prec, maxit, show):
          bet_n  = d.Dot(r1) - tr1.Dot(r1) + z2.Dot(r2);
          
          if (k==0):
-             bet = 0
+             bet = 0.
              p1 = Vector(z1)
              p2 = Vector(z2)
              s = Vector(d)
@@ -92,22 +95,23 @@ def bpcg(H, B, F, Qh, Qs, v0, prec, maxit, show):
              bet = bet_n / bet_n1
              
              # p^k = z^k + beta_k* p^{k-1}
-             p1 = z1 + bet * p1
-             p2 = z2 + bet * p2
+             p1.Update(1., z1,  bet)
+             p2.Update(1., z2,  bet)
                  
              # s^k = d + beta_k* s^{k-1}
-             s =  d + bet * s 
+             s.Update(1., d, bet) 
          
          # q = [s;0] + [B' p2^k ; B * p1^k]
 	 B.Multiply(False, p2, q1) 
-	 q1 += s 
+	 q1.Update(1., s, 1.)  
          B.Multiply(True, p1, q2)
     
          # w = [Qh^{-1}q1  ; B'Qh^{-1}q1 -q2 ]  
-         Qh.Multiply(False, q1, w1)
+         w1.Update(1., q1, 0.)
+         #Qh.Multiply(False, q1, w1)
          #w2 = B.T*w1-q2
          B.Multiply(True, w1, w2)
-	 w2 -= q2
+	 w2.Update(-1., q2, 1.)
     
          #alpha_k^d = <w_1,s^k>-<q_1,p_1^k> + <w_2,p_2^k> 
          alp_d = w1.Dot(s) - q1.Dot(p1) + w2.Dot(p2)
@@ -116,22 +120,22 @@ def bpcg(H, B, F, Qh, Qs, v0, prec, maxit, show):
          alp = bet_n / alp_d
     
          # v^{k+1} = v^k + alpha_k p^k
-         x += alp * p1
-         y += alp * p2
+         x.Update(alp, p1, 1.)
+         y.Update(alp, p2, 1.)
          
          # r^{k+1} = r^k - alpha_k w
-         r1 -= alp * w1
-         r2 -= alp * w2
+         r1.Update(-alp, w1, 1.)
+         r2.Update(-alp, w2, 1.)
     
          # r_check_1^{k+1} = r_check_1^k - alpha_k q_1
-         tr1 -= alp * q1
+         tr1.Update(-alp, q1, 1.)
     
          # update
          bet_n1 = bet_n
          k += 1
          
-         res = norm(hstack((r1, r2)))  
-         if ((show) and ((k % 10) == 0)):
+         res = sqrt(r1.Norm2()**2 + r2.Norm2()**2)
+         if show and (k % 1 == 0) and verbose:
              print '%d  %.3e '% (k, res)
     
     sol = hstack((x, y))
