@@ -1,4 +1,4 @@
-def bpcg(H, B, F, Qh, Qs, v0, prec, maxit, show):
+def bpcg(H, B, Fx, Fy, Qh, Qs, x0, y0, prec, maxit, show):
     """
     sol, res, k = bpcg(H, B, F, Qh, Qs, v0, prec, maxit, show)
     Implements the Bramble-Pasciak Block preconditionned conjugate gradient
@@ -27,23 +27,24 @@ def bpcg(H, B, F, Qh, Qs, v0, prec, maxit, show):
     """ 
    
     from Epetra import Vector
-    from EpetraMyTools import subVector
     from numpy import sqrt
     Nh = H.NumGlobalCols()
     verbose = (H.Comm().MyPID==0) 
 
-    x = subVector(v0, range(Nh))
-    y = subVector(v0, range(Nh, v0.shape[0]))
-    r1  = Vector(x)
-    r2  = Vector(y)
+    x = Vector(x0)
+    y = Vector(y0)
+    
+    
+    r1  = Vector(x0)
+    r2  = Vector(y0)
 
     # r_check_0 = f- K *v 
-    tr1 = subVector(F, range(Nh))
+    tr1 = Vector(Fx)
     H.Multiply(False, x, r1)
     tr1.Update(-1., r1, 1.)
     B.Multiply(False, y, r1)
     tr1.Update(-1., r1, 1.)
-    tr2 = subVector(F, range(Nh, F.shape[0])) 
+    tr2 = Vector(Fy) 
     B.Multiply(True, x, r2)
     tr2.Update(-1., r2, 1.)
 
@@ -56,7 +57,7 @@ def bpcg(H, B, F, Qh, Qs, v0, prec, maxit, show):
     B.Multiply(True, r1, r2)
     r2.Update(-1., tr2, 1.)
     res = sqrt(r1.Norm2()**2 + r2.Norm2()**2)
-    nF = F.Norm2()
+    nF = sqrt(Fx.Norm2()**2 + Fy.Norm2()**2)
 
     # pre-alloc
     z1 = Vector(x)
@@ -76,8 +77,9 @@ def bpcg(H, B, F, Qh, Qs, v0, prec, maxit, show):
     while ((res > prec * nF) and (k <= maxit)):
          
          #solve the \tilde{K} z^k = r^k 
-         #Qs.Multiply(False, r2, z2)
-         z2.Update(1., r2, 0.)
+         if (verbose):
+	     print "prout"
+	 Qs.Multiply(False, r2, z2)
          z1.Update(1., r1, 0.)
          
          # d = H * r_1^k
@@ -107,8 +109,8 @@ def bpcg(H, B, F, Qh, Qs, v0, prec, maxit, show):
          B.Multiply(True, p1, q2)
     
          # w = [Qh^{-1}q1  ; B'Qh^{-1}q1 -q2 ]  
-         w1.Update(1., q1, 0.)
-         #Qh.Multiply(False, q1, w1)
+         #w1.Update(1., q1, 0.)
+         Qh.Multiply(False, q1, w1)
          #w2 = B.T*w1-q2
          B.Multiply(True, w1, w2)
 	 w2.Update(-1., q2, 1.)
@@ -138,7 +140,6 @@ def bpcg(H, B, F, Qh, Qs, v0, prec, maxit, show):
          if show and (k % 1 == 0) and verbose:
              print '%d  %.3e '% (k, res)
     
-    sol = hstack((x, y))
     #res = norm(hstack((H * x + B * y, x * B)) - F) / nF
-    return sol, res, k
+    return x, y 
 

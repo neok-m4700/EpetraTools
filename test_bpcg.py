@@ -1,4 +1,5 @@
 from PyTrilinos import Epetra, EpetraExt
+from EpetraMyTools import subVector
 from EpetraBpcg import bpcg
 from scipy2Trilinos import scipy_csr_matrix2CrsMatrix
 from numpy import load, nonzero
@@ -41,7 +42,7 @@ Qhs=spdiags(np.ones((Hs.shape[0]), dtype='float'), 0, Hs.shape[0], Hs.shape[1]).
 Qh=scipy_csr_matrix2CrsMatrix(Qhs, mycomm)
 H=scipy_csr_matrix2CrsMatrix(Hs, mycomm)
 
-F = load_vec("F.mat.npz")
+f = load_vec("F.mat.npz")
 mpc=load_vec("mpc.mat.npz")
 Qss=spdiags(1./mpc[:,0],(0),mpc.shape[0],mpc.shape[0]).tocsr()
 Qs=scipy_csr_matrix2CrsMatrix(Qss, mycomm)
@@ -50,8 +51,16 @@ X=Epetra.Vector(A.DomainMap())
 for i in range(X.MyLength()):
     X[i] = 0. 
 # definition du second membre
-Y=Epetra.Vector(A.RangeMap())
-for ii in range(Y.MyLength()):
-    i=  Y.Map().GID(ii)
-    Y[ii] = F[i]
-bpcg(H, B, Y, Qh, Qs, X, 1e-3, 10, True)
+F=Epetra.Vector(A.RangeMap())
+for ii in range(F.MyLength()):
+    i=  F.Map().GID(ii)
+    F[ii] = f[i]
+Nh = H.NumGlobalRows()
+vx = subVector(X, range(Nh))
+vy = subVector(X, range(Nh, X.GlobalLength()))
+Fx = subVector(F, range(Nh))
+Fy = subVector(F, range(Nh, F.GlobalLength())) 
+
+Qs.Multiply(False, vx, Fx)
+bpcg(H, B, Fx, Fy , Qh, Qs, vx, vy , 1e-3, 10, True)
+
