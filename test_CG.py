@@ -5,10 +5,10 @@ import numpy as np
 from scipy.sparse import csr_matrix, spdiags, rand
 
 np.random.seed(12)
-N=4
-data=np.array([[-1],[2],[-1]])*np.ones((1,N))
-diags = np.array([-1,0,1])
-Z = rand(N,N, 0.2)
+N=100
+#data=np.array([[-1],[2],[-1]])*np.ones((1,N))
+#diags = np.array([-1,0,1])
+Z = rand(N,N, 0.4)
 Z = Z + Z.T 
 #A_csr=spdiags(data, diags, 4, 4).tocsr()
 A_csr = Z.tocsr() 
@@ -28,5 +28,5 @@ for ii in range(Y.MyLength()):
     i=  Y.Map().GID(ii)
     Y[ii] = F[i]
 
-sol = cg(A, X, Y, 1e-9, 2)
+sol = cg(A, X, Y, 1e-6, 2000)
 
