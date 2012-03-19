@@ -1,4 +1,4 @@
-Some basic tools to use , test and learn PyTrilinos
+Some basic tools to use, test and learn PyTrilinos
  -scipy2Trilinos : convert from scipy.sparse csr matrix to Epetra.CrsMatrix
- -EpetraCG : naive implementation of a conjugaute gradient to illustrate use of Epetra Vector and Matrices
+ -EpetraCG : naive implementation of a conjuguate gradient to illustrate use of Epetra Vector and Matrices
 

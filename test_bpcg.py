@@ -61,6 +61,9 @@ vy = subVector(X, range(Nh, X.GlobalLength()))
 Fx = subVector(F, range(Nh))
 Fy = subVector(F, range(Nh, F.GlobalLength())) 
 
-Qs.Multiply(False, vx, Fx)
-bpcg(H, B, Fx, Fy , Qh, Qs, vx, vy , 1e-3, 10, True)
-
+print vy.GlobalLength()
+print Fy.GlobalLength()
+print "Qs" , Qs.NumGlobalRows(), Qs.NumGlobalCols()
+Qs.Multiply(False, vy, Fy)
+Qh.Multiply(False, vx, Fx)
+#bpcg(H, B, Fx, Fy , Qh, Qs, vx, vy , 1e-3, 10, True)

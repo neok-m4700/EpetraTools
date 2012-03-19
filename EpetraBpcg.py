@@ -28,7 +28,6 @@ def bpcg(H, B, Fx, Fy, Qh, Qs, x0, y0, prec, maxit, show):
    
     from Epetra import Vector
     from numpy import sqrt
-    Nh = H.NumGlobalCols()
     verbose = (H.Comm().MyPID==0) 
 
     x = Vector(x0)
@@ -38,12 +37,14 @@ def bpcg(H, B, Fx, Fy, Qh, Qs, x0, y0, prec, maxit, show):
     r1  = Vector(x0)
     r2  = Vector(y0)
 
-    # r_check_0 = f- K *v 
+    # r1_0 = Fx - H * x - B * y
     tr1 = Vector(Fx)
     H.Multiply(False, x, r1)
     tr1.Update(-1., r1, 1.)
     B.Multiply(False, y, r1)
     tr1.Update(-1., r1, 1.)
+    
+    # r2_0 = F_y - B' * x
     tr2 = Vector(Fy) 
     B.Multiply(True, x, r2)
     tr2.Update(-1., r2, 1.)
@@ -52,7 +53,7 @@ def bpcg(H, B, Fx, Fy, Qh, Qs, x0, y0, prec, maxit, show):
     # with G = [inv(Qh)     0  
     #           B*inv(Qh) - I]
     # the guilty line!
-    #Qh.Multiply(False, tr1, r1)
+    Qh.Multiply(False, tr1, r1)
     r1.Update(1., tr1, 0.)
     B.Multiply(True, r1, r2)
     r2.Update(-1., tr2, 1.)
