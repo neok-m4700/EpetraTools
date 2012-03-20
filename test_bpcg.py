@@ -47,24 +47,29 @@ mpc=load_vec("mpc.mat.npz")
 Qss=spdiags(1./mpc[:,0],(0),mpc.shape[0],mpc.shape[0]).tocsr()
 Qs=scipy_csr_matrix2CrsMatrix(Qss, mycomm)
 
+vx=Epetra.Vector(H.DomainMap())
+vy=Epetra.Vector(B.DomainMap())
+Fx=Epetra.Vector(H.RangeMap())
+Fy=Epetra.Vector(B.DomainMap())
 X=Epetra.Vector(A.DomainMap())
 for i in range(X.MyLength()):
     X[i] = 0. 
-# definition du second membre
+## definition du second membre
 F=Epetra.Vector(A.RangeMap())
 for ii in range(F.MyLength()):
     i=  F.Map().GID(ii)
     F[ii] = f[i]
 Nh = H.NumGlobalRows()
-vx = subVector(X, range(Nh))
-vy = subVector(X, range(Nh, X.GlobalLength()))
-Fx = subVector(F, range(Nh))
-Fy = subVector(F, range(Nh, F.GlobalLength())) 
+#vx = subVector(X, range(Nh))
+#vy = subVector(X, range(Nh, X.GlobalLength()))
+#Fx = subVector(F, range(Nh))
+#Fy = subVector(F, range(Nh, F.GlobalLength())) 
 
-print vy.GlobalLength()
-print Fy.GlobalLength()
-print "Qs" , Qs.NumGlobalRows(), Qs.NumGlobalCols()
-for i in range(10):
-  Qs.Multiply(False, vy, Fy)
-#Qh.Multiply(False, vx, Fx)
+
+
+
+
+#Qs.Multiply(False, vy, Fy)
+for i in range(100):
+  Qh.Multiply(False, vx, Fx)
 #bpcg(H, B, Fx, Fy , Qh, Qs, vx, vy , 1e-3, 10, True)

@@ -32,7 +32,6 @@ def subVector(V, ind):
     # the local components of the Map of S
     sMyElems=range(l2[myid],l2[myid]+l[myid])
     sMap = Epetra.Map(-1, sMyElems, 0, comm)
-    print myid,l2[myid],l2[myid]+l[myid] 
     s=Epetra.Vector(sMap)
     for it,el in enumerate(local_elems):
          s[it]=V[vMap.LID(el)]
