@@ -29,12 +29,13 @@ def subVector(V, ind):
     l = comm.GatherAll(local_elems.__len__())
     l2=[0]+l.cumsum()[:-1].tolist()
     
-    # the local compopents of the Map of S
+    # the local components of the Map of S
     sMyElems=range(l2[myid],l2[myid]+l[myid])
     sMap = Epetra.Map(-1, sMyElems, 0, comm)
+    print myid,l2[myid],l2[myid]+l[myid] 
     s=Epetra.Vector(sMap)
-    for i in range(local_elems.__len__()):
-        s[sMap.LID(i)] = V[vMap.LID(i)]
+    for it,el in enumerate(local_elems):
+         s[it]=V[vMap.LID(el)]
     return s 
 
 def subCrsMatrix(A, indx, indy):
