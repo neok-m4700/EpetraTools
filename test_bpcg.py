@@ -17,6 +17,12 @@ def load_vec(filename):
     dic=load(filename)
     return dic['arr_0']
 
+def copy_vec(Vp, Vn):
+    vmap =  Vp.Map();
+    for ii in range(Vp.MyLength()):
+        i = vmap.GID(ii)
+	Vp[ii] =Vn[i] 
+
 mycomm = Epetra.PyComm()
 tps = Epetra.Time(mycomm)
 tps.ResetStartTime()
@@ -35,9 +41,11 @@ if (mycomm.MyPID() == 0):
 
 from scipy.sparse import spdiags
 
-Bs=load_mat("H.mat.npz")
+Bs=load_mat("B.mat.npz")
+print "Bs = ", Bs.shape
 B=scipy_csr_matrix2CrsMatrix(Bs, mycomm)
 Hs=load_mat("H.mat.npz")
+print "Hs =", Hs.shape
 Qhs=spdiags(np.ones((Hs.shape[0]), dtype='float'), 0, Hs.shape[0], Hs.shape[1]).tocsr()
 Qh=scipy_csr_matrix2CrsMatrix(Qhs, mycomm)
 H=scipy_csr_matrix2CrsMatrix(Hs, mycomm)
@@ -50,26 +58,15 @@ Qs=scipy_csr_matrix2CrsMatrix(Qss, mycomm)
 vx=Epetra.Vector(H.DomainMap())
 vy=Epetra.Vector(B.DomainMap())
 Fx=Epetra.Vector(H.RangeMap())
-Fy=Epetra.Vector(B.DomainMap())
-X=Epetra.Vector(A.DomainMap())
-for i in range(X.MyLength()):
-    X[i] = 0. 
+#Fy=Epetra.Vector(B.DomainMap())
+Nh = H.NumGlobalCols() 
 ## definition du second membre
-F=Epetra.Vector(A.RangeMap())
-for ii in range(F.MyLength()):
-    i=  F.Map().GID(ii)
-    F[ii] = f[i]
-Nh = H.NumGlobalRows()
-#vx = subVector(X, range(Nh))
-#vy = subVector(X, range(Nh, X.GlobalLength()))
-#Fx = subVector(F, range(Nh))
-#Fy = subVector(F, range(Nh, F.GlobalLength())) 
+copy_vec(Fx,f[0:Nh])
+print "B = ", B.NumGlobalRows(), B.NumGlobalCols(), 
+#print f[Nh:].shape, B.DomainMap().NumGlobalElements()
+#copy_vec(Fy,f[Nh:])
 
-
-
-
-
-#Qs.Multiply(False, vy, Fy)
 for i in range(100):
   Qh.Multiply(False, vx, Fx)
+  #Qs.Multiply(False, vy, Fy)
 #bpcg(H, B, Fx, Fy , Qh, Qs, vx, vy , 1e-3, 10, True)
