@@ -78,8 +78,6 @@ def bpcg(H, B, Fx, Fy, Qh, Qs, x0, y0, prec, maxit, show):
     while ((res > prec * nF) and (k <= maxit)):
          
          #solve the \tilde{K} z^k = r^k 
-         if (verbose):
-	     print "prout"
 	 Qs.Multiply(False, r2, z2)
          z1.Update(1., r1, 0.)
          
@@ -88,7 +86,7 @@ def bpcg(H, B, Fx, Fy, Qh, Qs, x0, y0, prec, maxit, show):
          #beta^n_k = <d,r_1^k> -<r_check_1^k,r_1^k> +<z_2^k,r_2^k>
          bet_n  = d.Dot(r1) - tr1.Dot(r1) + z2.Dot(r2);
          
-         if (k==0):
+         if k==0:
              bet = 0.
              p1 = Vector(z1)
              p2 = Vector(z2)
@@ -110,7 +108,6 @@ def bpcg(H, B, Fx, Fy, Qh, Qs, x0, y0, prec, maxit, show):
          B.Multiply(True, p1, q2)
     
          # w = [Qh^{-1}q1  ; B'Qh^{-1}q1 -q2 ]  
-         #w1.Update(1., q1, 0.)
          Qh.Multiply(False, q1, w1)
          #w2 = B.T*w1-q2
          B.Multiply(True, w1, w2)
@@ -138,9 +135,8 @@ def bpcg(H, B, Fx, Fy, Qh, Qs, x0, y0, prec, maxit, show):
          k += 1
          
          res = sqrt(r1.Norm2()**2 + r2.Norm2()**2)
-         if show and (k % 1 == 0) and verbose:
-             print '%d  %.3e '% (k, res)
+         #if show and (k % 1 == 0) and verbose:
+	 print '%d  %.3e '% (k, res)
     
-    #res = norm(hstack((H * x + B * y, x * B)) - F) / nF
     return x, y 
 

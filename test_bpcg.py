@@ -42,10 +42,8 @@ if (mycomm.MyPID() == 0):
 from scipy.sparse import spdiags
 
 Bs=load_mat("B.mat.npz")
-print "Bs = ", Bs.shape
 B=scipy_csr_matrix2CrsMatrix(Bs, mycomm)
 Hs=load_mat("H.mat.npz")
-print "Hs =", Hs.shape
 Qhs=spdiags(np.ones((Hs.shape[0]), dtype='float'), 0, Hs.shape[0], Hs.shape[1]).tocsr()
 Qh=scipy_csr_matrix2CrsMatrix(Qhs, mycomm)
 H=scipy_csr_matrix2CrsMatrix(Hs, mycomm)
@@ -58,15 +56,10 @@ Qs=scipy_csr_matrix2CrsMatrix(Qss, mycomm)
 vx=Epetra.Vector(H.DomainMap())
 vy=Epetra.Vector(B.DomainMap())
 Fx=Epetra.Vector(H.RangeMap())
-#Fy=Epetra.Vector(B.DomainMap())
+Fy=Epetra.Vector(B.DomainMap())
 Nh = H.NumGlobalCols() 
 ## definition du second membre
 copy_vec(Fx,f[0:Nh])
-print "B = ", B.NumGlobalRows(), B.NumGlobalCols(), 
-#print f[Nh:].shape, B.DomainMap().NumGlobalElements()
-#copy_vec(Fy,f[Nh:])
+copy_vec(Fy,f[Nh:])
 
-for i in range(100):
-  Qh.Multiply(False, vx, Fx)
-  #Qs.Multiply(False, vy, Fy)
-#bpcg(H, B, Fx, Fy , Qh, Qs, vx, vy , 1e-3, 10, True)
+x,y = bpcg(H, B, Fx, Fy , Qh, Qs, vx, vy , 1e-7, 100, True)
