@@ -28,7 +28,7 @@ def bpcg(H, B, Fx, Fy, Qh, Qs, x0, y0, prec, maxit, show):
    
     from Epetra import Vector
     from numpy import sqrt
-    verbose = (H.Comm().MyPID==0) 
+    verbose = (H.Comm().MyPID()==0) 
 
     x = Vector(x0)
     y = Vector(y0)
@@ -52,11 +52,13 @@ def bpcg(H, B, Fx, Fy, Qh, Qs, x0, y0, prec, maxit, show):
     # r0 = G r_check_0
     # with G = [inv(Qh)     0  
     #           B*inv(Qh) - I]
-    # the guilty line!
     Qh.Multiply(False, tr1, r1)
     r1.Update(1., tr1, 0.)
+    
     B.Multiply(True, r1, r2)
     r2.Update(-1., tr2, 1.)
+    
+    # norm evaluation
     res = sqrt(r1.Norm2()**2 + r2.Norm2()**2)
     nF = sqrt(Fx.Norm2()**2 + Fy.Norm2()**2)
 
@@ -83,10 +85,11 @@ def bpcg(H, B, Fx, Fy, Qh, Qs, x0, y0, prec, maxit, show):
          
          # d = H * r_1^k
          H.Multiply(False, r1, d)
-         #beta^n_k = <d,r_1^k> -<r_check_1^k,r_1^k> +<z_2^k,r_2^k>
+         
+	 #beta^n_k = <d,r_1^k> -<r_check_1^k,r_1^k> +<z_2^k,r_2^k>
          bet_n  = d.Dot(r1) - tr1.Dot(r1) + z2.Dot(r2);
          
-         if k==0:
+         if k == 0:
              bet = 0.
              p1 = Vector(z1)
              p2 = Vector(z2)
@@ -135,8 +138,8 @@ def bpcg(H, B, Fx, Fy, Qh, Qs, x0, y0, prec, maxit, show):
          k += 1
          
          res = sqrt(r1.Norm2()**2 + r2.Norm2()**2)
-         #if show and (k % 1 == 0) and verbose:
-	 print '%d  %.3e '% (k, res)
+         if show and (k % 1 == 0) and verbose:
+	       print '%d  %.3e '% (k, res)
     
-    return x, y 
+    return x, y, res, k 
 

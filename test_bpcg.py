@@ -56,10 +56,16 @@ Qs=scipy_csr_matrix2CrsMatrix(Qss, mycomm)
 vx=Epetra.Vector(H.DomainMap())
 vy=Epetra.Vector(B.DomainMap())
 Fx=Epetra.Vector(H.RangeMap())
-Fy=Epetra.Vector(B.DomainMap())
+Fy=Epetra.Vector(Qs.RangeMap())
 Nh = H.NumGlobalCols() 
 ## definition du second membre
-copy_vec(Fx,f[0:Nh])
-copy_vec(Fy,f[Nh:])
+fxmap =  Fx.Map()
+for ii in range(Fx.MyLength()):
+    i = fxmap.GID(ii)
+    Fx[ii] =f[0:Nh][i] 
+fymap =  Fy.Map()
+for ii in range(Fy.MyLength()):
+    i = fymap.GID(ii)
+    Fy[ii] =f[Nh:][i] 
 
-x,y = bpcg(H, B, Fx, Fy , Qh, Qs, vx, vy , 1e-7, 100, True)
+x,y,res, it = bpcg(H, B, Fx, Fy , Qh, Qs, vx, vy , 1e-7, 3, True)
