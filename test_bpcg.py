@@ -72,7 +72,7 @@ for ii in range(Fy.MyLength()):
 
 # solving system
 t1 = tps.WallTime()
-x,y,res, it = bpcg(H, B, Fx, Fy , Qh, Qs, vx, vy , 1e-7, 100, True)
+res, it = bpcg(H, B, Fx, Fy , Qh, Qs, vx, vy , 1e-7, 100, True)
 t2 = tps.WallTime()
 if mycomm.MyPID() == 0:
    print 'tps bpcg = %.3es' %  (t2-t1)

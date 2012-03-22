@@ -1,4 +1,4 @@
-def bpcg(H, B, Fx, Fy, Qh, Qs, x0, y0, prec, maxit, show):
+def bpcg(H, B, Fx, Fy, Qh, Qs, x, y, prec, maxit, show):
     """
     sol, res, k = bpcg(H, B, F, Qh, Qs, v0, prec, maxit, show)
     Implements the Bramble-Pasciak Block preconditionned conjugate gradient
@@ -30,12 +30,8 @@ def bpcg(H, B, Fx, Fy, Qh, Qs, x0, y0, prec, maxit, show):
     from numpy import sqrt
     verbose = (H.Comm().MyPID()==0) 
 
-    x = Vector(x0)
-    y = Vector(y0)
-    
-    
-    r1  = Vector(x0)
-    r2  = Vector(y0)
+    r1  = Vector(x)
+    r2  = Vector(y)
 
     # r1_0 = Fx - H * x - B * y
     tr1 = Vector(Fx)
@@ -140,5 +136,5 @@ def bpcg(H, B, Fx, Fy, Qh, Qs, x0, y0, prec, maxit, show):
          if show and (k % 10 == 0) and verbose:
 	       print '%d  %.3e '% (k, res)
     
-    return x, y, res, k 
+    return res, k 
 
