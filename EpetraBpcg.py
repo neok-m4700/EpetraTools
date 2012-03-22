@@ -53,7 +53,6 @@ def bpcg(H, B, Fx, Fy, Qh, Qs, x0, y0, prec, maxit, show):
     # with G = [inv(Qh)     0  
     #           B*inv(Qh) - I]
     Qh.Multiply(False, tr1, r1)
-    r1.Update(1., tr1, 0.)
     
     B.Multiply(True, r1, r2)
     r2.Update(-1., tr2, 1.)
@@ -138,7 +137,7 @@ def bpcg(H, B, Fx, Fy, Qh, Qs, x0, y0, prec, maxit, show):
          k += 1
          
          res = sqrt(r1.Norm2()**2 + r2.Norm2()**2)
-         if show and (k % 1 == 0) and verbose:
+         if show and (k % 10 == 0) and verbose:
 	       print '%d  %.3e '% (k, res)
     
     return x, y, res, k 

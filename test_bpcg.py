@@ -24,6 +24,7 @@ def copy_vec(Vp, Vn):
 	Vp[ii] =Vn[i] 
 
 mycomm = Epetra.PyComm()
+verbose = (mycomm.MyPID() == 0)
 tps = Epetra.Time(mycomm)
 tps.ResetStartTime()
 #chargement fichier 
@@ -35,7 +36,7 @@ if (mycomm.MyPID() == 0):
 t1 = tps.WallTime()
 A=scipy_csr_matrix2CrsMatrix(As, mycomm)
 t2 = tps.WallTime()
-if (mycomm.MyPID() == 0):
+if verbose: 
    print 'size(A) = (%d,%d) nnz(A) = %d '  %(A.NumGlobalRows(), A.NumGlobalCols(), A.NumGlobalNonzeros())
    print 'tps convert A = %.3es' %  (t2-t1)
 
@@ -44,7 +45,8 @@ from scipy.sparse import spdiags
 Bs=load_mat("B.mat.npz")
 B=scipy_csr_matrix2CrsMatrix(Bs, mycomm)
 Hs=load_mat("H.mat.npz")
-Qhs=spdiags(np.ones((Hs.shape[0]), dtype='float'), 0, Hs.shape[0], Hs.shape[1]).tocsr()
+h=Hs.diagonal()
+Qhs=spdiags(2./h, 0, Hs.shape[0], Hs.shape[1]).tocsr()
 Qh=scipy_csr_matrix2CrsMatrix(Qhs, mycomm)
 H=scipy_csr_matrix2CrsMatrix(Hs, mycomm)
 
@@ -57,8 +59,8 @@ vx=Epetra.Vector(H.DomainMap())
 vy=Epetra.Vector(B.DomainMap())
 Fx=Epetra.Vector(H.RangeMap())
 Fy=Epetra.Vector(Qs.RangeMap())
+
 Nh = H.NumGlobalCols() 
-## definition du second membre
 fxmap =  Fx.Map()
 for ii in range(Fx.MyLength()):
     i = fxmap.GID(ii)
@@ -68,4 +70,9 @@ for ii in range(Fy.MyLength()):
     i = fymap.GID(ii)
     Fy[ii] =f[Nh:][i] 
 
-x,y,res, it = bpcg(H, B, Fx, Fy , Qh, Qs, vx, vy , 1e-7, 3, True)
+# solving system
+t1 = tps.WallTime()
+x,y,res, it = bpcg(H, B, Fx, Fy , Qh, Qs, vx, vy , 1e-7, 100, True)
+t2 = tps.WallTime()
+if mycomm.MyPID() == 0:
+   print 'tps bpcg = %.3es' %  (t2-t1)
