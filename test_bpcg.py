@@ -42,37 +42,37 @@ if verbose:
 
 from scipy.sparse import spdiags
 
-Bs=load_mat("B.mat.npz")
-B=scipy_csr_matrix2CrsMatrix(Bs, mycomm)
+# load H and convert it
 Hs=load_mat("H.mat.npz")
-h=Hs.diagonal()
-Qhs=spdiags(2./h, 0, Hs.shape[0], Hs.shape[1]).tocsr()
-Qh=scipy_csr_matrix2CrsMatrix(Qhs, mycomm)
 H=scipy_csr_matrix2CrsMatrix(Hs, mycomm)
 
-f = load_vec("F.mat.npz")
+#load B and convert it
+Bs=load_mat("B.mat.npz")
+B=scipy_csr_matrix2CrsMatrix(Bs, mycomm)
+
+# build Qh diagonal precond
+Qh=Epetra.Vector(H.DomainMap())
+copy_vec(Qh, 2./(Hs.diagonal()))
+
+# buld Qs diagonal precond
 mpc=load_vec("mpc.mat.npz")
-Qss=spdiags(1./mpc[:,0],(0),mpc.shape[0],mpc.shape[0]).tocsr()
-Qs=scipy_csr_matrix2CrsMatrix(Qss, mycomm)
+Qs=Epetra.Vector(B.DomainMap())
+copy_vec(Qs, 1./mpc[:,0])
 
 vx=Epetra.Vector(H.DomainMap())
 vy=Epetra.Vector(B.DomainMap())
-Fx=Epetra.Vector(H.RangeMap())
-Fy=Epetra.Vector(Qs.RangeMap())
 
+# build RHS
+f = load_vec("F.mat.npz")
+Fx=Epetra.Vector(H.RangeMap())
+Fy=Epetra.Vector(B.DomainMap())
 Nh = H.NumGlobalCols() 
-fxmap =  Fx.Map()
-for ii in range(Fx.MyLength()):
-    i = fxmap.GID(ii)
-    Fx[ii] =f[0:Nh][i] 
-fymap =  Fy.Map()
-for ii in range(Fy.MyLength()):
-    i = fymap.GID(ii)
-    Fy[ii] =f[Nh:][i] 
+copy_vec(Fx, f[0:Nh])
+copy_vec(Fy, f[Nh:])
 
 # solving system
 t1 = tps.WallTime()
-res, it = bpcg(H, B, Fx, Fy , Qh, Qs, vx, vy , 1e-7, 100, True)
+res, it = bpcg(H, B, Fx, Fy , Qh, Qs, vx, vy , 1e-12, 100, True)
 t2 = tps.WallTime()
-if mycomm.MyPID() == 0:
+if verbose:
    print 'tps bpcg = %.3es' %  (t2-t1)

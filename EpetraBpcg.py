@@ -48,7 +48,7 @@ def bpcg(H, B, Fx, Fy, Qh, Qs, x, y, prec, maxit, show):
     # r0 = G r_check_0
     # with G = [inv(Qh)     0  
     #           B*inv(Qh) - I]
-    Qh.Multiply(False, tr1, r1)
+    r1.Multiply(1., Qh, tr1, 0.)
     
     B.Multiply(True, r1, r2)
     r2.Update(-1., tr2, 1.)
@@ -75,7 +75,7 @@ def bpcg(H, B, Fx, Fy, Qh, Qs, x, y, prec, maxit, show):
     while ((res > prec * nF) and (k <= maxit)):
          
          #solve the \tilde{K} z^k = r^k 
-	 Qs.Multiply(False, r2, z2)
+	 z2.Multiply(1., Qs, r2, 0.)
          z1.Update(1., r1, 0.)
          
          # d = H * r_1^k
@@ -106,7 +106,7 @@ def bpcg(H, B, Fx, Fy, Qh, Qs, x, y, prec, maxit, show):
          B.Multiply(True, p1, q2)
     
          # w = [Qh^{-1}q1  ; B'Qh^{-1}q1 -q2 ]  
-         Qh.Multiply(False, q1, w1)
+         w1.Multiply(1., Qh,  q1, 0.)
          #w2 = B.T*w1-q2
          B.Multiply(True, w1, w2)
 	 w2.Update(-1., q2, 1.)
