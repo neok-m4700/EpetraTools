@@ -72,7 +72,8 @@ copy_vec(Fy, f[Nh:])
 
 # solving system
 t1 = tps.WallTime()
-res, it = bpcg(H, B, Fx, Fy , Qh, Qs, vx, vy , 1e-12, 100, True)
+res, it = bpcg(H, B, Fx, Fy , Qh, Qs, vx, vy , 1e-7, 3000, True)
 t2 = tps.WallTime()
 if verbose:
+   print "res =  %.3e , it = %d" % (res,it) 
    print 'tps bpcg = %.3es' %  (t2-t1)

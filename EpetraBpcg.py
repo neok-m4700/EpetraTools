@@ -134,7 +134,7 @@ def bpcg(H, B, Fx, Fy, Qh, Qs, x, y, prec, maxit, show):
          
          res = sqrt(r1.Norm2()**2 + r2.Norm2()**2)
          if show and (k % 10 == 0) and verbose:
-	       print '%d  %.3e '% (k, res)
+	       print '%d  %.3e '% (k, res/nF)
     
-    return res, k 
+    return res/nF, k 
 
