@@ -3,27 +3,33 @@ def bpcg(H, B, Fx, Fy, Qh, Qs, x, y, prec, maxit, show):
     sol, res, k = bpcg(H, B, F, Qh, Qs, v0, prec, maxit, show)
     Implements the Bramble-Pasciak Block preconditionned conjugate gradient
     algorithm taken from the article
+    to solve 
     
-    K = [ H B; B' 0]
+    [ H B ] . [ x ] = [ Fx ]
+    [ B' 0]   [ y ]   [ Fy ]
+    
     Input :
     -------
     
     H     : discrete laplacian matrix
     B     : divergence part
-    F     : source term (right hand side)
-    Qh    : laplacien precond matrix H-Qh must be positive
-    Qs    : schur complement part precond matrix 
-    v0    : initial point
+    Fx    : laplacian right hand side
+    Fy    : schur complement right hand side
+    Qh    : vector of diagonal precond for matrix H (H-Qh) must be positive
+    Qs    : vector of diagonal schur complement 
+    x     : laplacian initial guess 
+    y     : schur complement initial guess 
     prec  : relative precision: STOP when ||r|| < prec ||F|| 
-    maxit :  max number of iterations
+    maxit : max number of iterations
     show  : boolean flag for information
     
     Output :
     --------
     
-    sol   : solution of the system
-    res   : true residual
-    it    : number of iterations 
+    x   : laplacian part of the solution
+    y   : schur complement par of the solution
+    res : residual (||K*x-F||/||F||)
+    it  : number of iterations 
     """ 
    
     from Epetra import Vector
