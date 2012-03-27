@@ -136,5 +136,12 @@ def bpcg(H, B, Fx, Fy, Qh, Qs, x, y, prec, maxit, show):
          if show and (k % 10 == 0) and verbose:
 	       print '%d  %.3e '% (k, res/nF)
     
-    return res/nF, k 
+    H.Multiply(False, x, tr1)
+    B.Multiply(False, y, r1)
+    tr1.Update(1., r1, -1., Fx, 1.)
+
+    B.Multiply(True, x, tr2)
+    tr2.Update(-1., Fy, 1.)
+    residu=sqrt(tr1.Norm2()**2 + tr2.Norm2()**2)
+    return residu/nF, k 
 
