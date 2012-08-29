@@ -16,7 +16,4 @@ for ii in range(Y.MyLength()):
     Y[ii] = F[i]
 A.Multiply(False, X, Y)
 print Y
-X=Epetra.Vector(Y)
-A.Multiply(False, Y, Y)
-print Y
 del A
