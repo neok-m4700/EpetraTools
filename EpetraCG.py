@@ -1,6 +1,6 @@
-def cg(A, x0, F, prec, maxit, show=True):
+def cg(A, x0, F, prec, maxit, show=False):
     """
-    sol, res, k = cg(A, x0, F,  prec, maxit, show)
+    sol, k = cg(A, x0, F,  prec, maxit, show)
     Implements a naive conjugate gradient for solving Ax = F
     
     Input :
@@ -20,19 +20,19 @@ def cg(A, x0, F, prec, maxit, show=True):
     it    : number of iterations 
     """ 
    
-    from Epetra import Vector
+    from PyTrilinos.Epetra import Vector
     from numpy import sqrt
     
     x = Vector(x0)
     r = Vector(F)
     Ap = Vector(F)
-    A.Multiply(False, x, Ap)
-    r.Update(-1.,Ap, 1.)
+    A.Apply(x, Ap)
+    r.Update(-1., Ap, 1.)
     p=Vector(r)
     rsold=r.Dot(r)
     nF = F.Norm2()
     for i in range(maxit):
-	A.Multiply(False, p , Ap)
+	A.Apply(p, Ap)
 	alpha=rsold/(p.Dot(Ap))
         x.Update(alpha, p, 1.)
         r.Update(-alpha, Ap, 1.)
@@ -44,5 +44,5 @@ def cg(A, x0, F, prec, maxit, show=True):
               break
 	p.Update(1., r, rsnew/rsold , p, 0.)
 	rsold = rsnew
-    return x 
+    return x, n_r, i 
 
