@@ -2,7 +2,7 @@ from PyTrilinos import Epetra, EpetraExt, TriUtils
 from EpetraCG import cg
 import numpy as np
 
-N=200
+N=3
 mycomm = Epetra.PyComm()
 gal = TriUtils.CrsMatrixGallery('laplace_3d', mycomm)
 gal.Set('nx', N)
@@ -30,3 +30,4 @@ sol, res , k = cg(A, X, Y, 1e-6, 2000)
 if mycomm.MyPID() == 0 : 
     print 'nb_it = ',  k
     print 'n_r = %.3e ' % res 
+    print A.DomainMap()
