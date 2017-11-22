@@ -3,16 +3,18 @@ from PyTrilinos import Epetra
 
 
 def AddToProfile(G, indx, indy):
- iy=indy.tolist()
- for ix in indx: 
-    G.InsertGlobalIndices(ix, iy)  
+    iy = indy.tolist()
+    for ix in indx:
+        G.InsertGlobalIndices(ix, iy)
+
 
 def AddMatElem(A, indx, indy, s):
-  m = indx.__len__()
-  n = indy.__len__()
-  ix = [i for i in indx for j in range(n)]
-  iy = indy.tolist()*m
-  A.SumIntoGlobalValues(ix, iy, s)  
+    m = indx.__len__()
+    n = indy.__len__()
+    ix = [i for i in indx for j in range(n)]
+    iy = indy.tolist() * m
+    A.SumIntoGlobalValues(ix, iy, s)
+
 
 def subVector(V, ind):
     """ construct a Vector extracted from a Vector
@@ -21,49 +23,50 @@ def subVector(V, ind):
     comm = V.Comm()
     vMap = V.Map()
     myid = comm.MyPID()
-    myelems=vMap.MyGlobalElements()
-    
-    #find local_elems which are in indx
+    myelems = vMap.MyGlobalElements()
+
+    # find local_elems which are in indx
     #local_elems=[item for item in myelems if item in ind]
-    local_elems =set(myelems) & set(ind)
+    local_elems = set(myelems) & set(ind)
     l = comm.GatherAll(local_elems.__len__())
-    l2=[0]+l.cumsum()[:-1].tolist()
-    
+    l2 = [0] + l.cumsum()[:-1].tolist()
+
     # the local components of the Map of S
-    sMyElems=range(l2[myid],l2[myid]+l[myid])
+    sMyElems = list(range(l2[myid], l2[myid] + l[myid]))
     sMap = Epetra.Map(-1, sMyElems, 0, comm)
-    s=Epetra.Vector(sMap)
-    for it,el in enumerate(local_elems):
-         s[it]=V[vMap.LID(el)]
-    return s 
+    s = Epetra.Vector(sMap)
+    for it, el in enumerate(local_elems):
+        s[it] = V[vMap.LID(el)]
+    return s
+
 
 def subCrsMatrix(A, indx, indy):
     """ construct a CrsMatrix extracted from a CrsMatrix
     S = subCrsMatrix(A, indx, indy)
     S is such that S(k,l) = A(indx(k), indy(l))
     """
-    comm =A.Comm()
+    comm = A.Comm()
     aMap = A.RowMap()
-    myelems=aMap.MyGlobalElements()
-    
-    #find local_elems which are in indx
-    local_elems=[item for item in myelems if item in indx]
+    myelems = aMap.MyGlobalElements()
+
+    # find local_elems which are in indx
+    local_elems = [item for item in myelems if item in indx]
     l = comm.GatherAll(local_elems.__len__())
-    l2=[0]+l.cumsum()[:-1].tolist()
-    myid=comm.MyPID()
-    
+    l2 = [0] + l.cumsum()[:-1].tolist()
+    myid = comm.MyPID()
+
     # the local compopents of the Map of S
-    sMyElems=range(l2[myid],l2[myid]+l[myid])
+    sMyElems = list(range(l2[myid], l2[myid] + l[myid]))
     sMap = Epetra.Map(-1, sMyElems, 0, comm)
-    S=Epetra.CrsMatrix(Epetra.Copy, sMap, A.MaxNumEntries())
-    
-    for it,elem  in enumerate(local_elems): 
-	   [val,ind] = A.ExtractGlobalRowCopy(elem)
-	   # the row in A is not empty
-	   if ind.__len__() > 0:
-	       coup=zip(*[(val[i],item) for i,item in enumerate(ind) if item in indy])
-	       # the row must contains indices from indy
-	       if coup.__len__()>0:
-	          S.InsertGlobalValues(sMyElems[it], coup[0], coup[1])
+    S = Epetra.CrsMatrix(Epetra.Copy, sMap, A.MaxNumEntries())
+
+    for it, elem in enumerate(local_elems):
+        [val, ind] = A.ExtractGlobalRowCopy(elem)
+        # the row in A is not empty
+        if ind.__len__() > 0:
+            coup = list(zip(*[(val[i], item) for i, item in enumerate(ind) if item in indy]))
+            # the row must contains indices from indy
+            if coup.__len__() > 0:
+                S.InsertGlobalValues(sMyElems[it], coup[0], coup[1])
     S.FillComplete()
     return S

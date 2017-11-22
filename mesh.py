@@ -4,12 +4,12 @@
 
 import vtk
 import numpy as np
-Nx=4
-Ny=Nx
-Nz=Nx
-L=1.
-P=L
-H=L
+Nx = 4
+Ny = Nx
+Nz = Nx
+L = 1.
+P = L
+H = L
 # beware the x,y slicing is not the same as in matlab
 X, Y, Z = np.mgrid[0: L: Nx * 1.j,
                    0: P: Ny * 1.j,
@@ -22,11 +22,11 @@ X, Y, Z = np.mgrid[0: L: Nx * 1.j,
 math = vtk.vtkMath()
 points = vtk.vtkPoints()
 l = 0
-for i in xrange(X.shape[0]):
-  for j in xrange(X.shape[1]):
-    for k in xrange(X.shape[2]):
-      points.InsertPoint(l, X[i,j,k], Y[i,j,k], Z[i,j,k])
-      l=l+1
+for i in range(X.shape[0]):
+    for j in range(X.shape[1]):
+        for k in range(X.shape[2]):
+            points.InsertPoint(l, X[i, j, k], Y[i, j, k], Z[i, j, k])
+            l = l + 1
 profile = vtk.vtkPolyData()
 profile.SetPoints(points)
 
@@ -38,7 +38,7 @@ profile.SetPoints(points)
 delny = vtk.vtkDelaunay3D()
 delny.SetInputData(profile)
 delny.SetTolerance(0.01)
-#delny.SetAlpha(0.2)
+# delny.SetAlpha(0.2)
 delny.BoundingTriangulationOff()
 
 # Shrink the result to help see it better.
