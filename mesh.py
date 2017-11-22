@@ -21,12 +21,12 @@ X, Y, Z = np.mgrid[0: L: Nx * 1.j,
 # vtkPolyData.
 math = vtk.vtkMath()
 points = vtk.vtkPoints()
-l = 0
+idx = 0
 for i in range(X.shape[0]):
     for j in range(X.shape[1]):
         for k in range(X.shape[2]):
-            points.InsertPoint(l, X[i, j, k], Y[i, j, k], Z[i, j, k])
-            l = l + 1
+            points.InsertPoint(idx, X[i, j, k], Y[i, j, k], Z[i, j, k])
+            idx += 1
 profile = vtk.vtkPolyData()
 profile.SetPoints(points)
 

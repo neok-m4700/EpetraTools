@@ -6,10 +6,10 @@ def cg(A, x0, F, prec, maxit, show=False):
     Input :
     -------
 
-    A     :  
-    x0    : initial guess 
+    A     : operator
+    x0    : initial guess
     F     : right hand side
-    prec  : relative precision: STOP when ||r|| < prec ||F|| 
+    prec  : relative precision: STOP when ||r|| < prec ||F||
     maxit :  max number of iterations
 
     Output :
@@ -17,7 +17,7 @@ def cg(A, x0, F, prec, maxit, show=False):
 
     sol   : solution of the system
     res   : true residual
-    it    : number of iterations 
+    it    : number of iterations
     """
 
     from PyTrilinos.Epetra import Vector
@@ -29,14 +29,14 @@ def cg(A, x0, F, prec, maxit, show=False):
     A.Apply(x, Ap)
     r.Update(-1., Ap, 1.)
     p = Vector(r)
-    rsold = r.Dot(r)
+    rsold = r.Dot(r)[0]
     nF = F.Norm2()
     for i in range(maxit):
         A.Apply(p, Ap)
-        alpha = rsold / (p.Dot(Ap))
+        alpha = rsold / (p.Dot(Ap)[0])
         x.Update(alpha, p, 1.)
         r.Update(-alpha, Ap, 1.)
-        rsnew = r.Dot(r)
+        rsnew = r.Dot(r)[0]
         n_r = sqrt(rsnew)
         if A.Comm().MyPID() == 0 and show and (i % 1 == 0):
             print('it %d = %.3e' % (i, n_r))

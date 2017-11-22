@@ -1,5 +1,6 @@
 from PyTrilinos import Epetra, EpetraExt
 from EpetraMyTools import subVector
+
 mycomm = Epetra.PyComm()
 rank = mycomm.MyPID()
 N = 20
@@ -12,9 +13,9 @@ for ii in range(F.MyLength()):
 
 # print "rank = ", rank, 'F =', F
 
-V = subVector(F, list(range(0, N / 2)))
+V = subVector(F, list(range(0, N // 2)))
 print("rank = ", rank, 'V =', V)
-W = subVector(F, list(range(N / 2, N)))
+W = subVector(F, list(range(N // 2, N)))
 print("rank = ", rank, 'W =', W)
 T = subVector(F, [8, 12, 2, 17])
 print("rank = ", rank, 'T =', T)

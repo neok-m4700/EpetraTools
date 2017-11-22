@@ -77,8 +77,8 @@ def bpcg(H, B, Fx, Fy, Qh, Qs, x, y, prec, maxit, show):
     ###########################################
     # MAIN LOOP
     ###########################################
-    k = 0
-    while ((res > prec * nF) and (k <= maxit)):
+    bet_n1 = bet_n = k = 0
+    while (res > prec * nF) and (k <= maxit):
 
         # solve the \tilde{K} z^k = r^k
         z2.Multiply(1., Qs, r2, 0.)
@@ -88,7 +88,7 @@ def bpcg(H, B, Fx, Fy, Qh, Qs, x, y, prec, maxit, show):
         H.Multiply(False, r1, d)
 
         # beta^n_k = <d,r_1^k> -<r_check_1^k,r_1^k> +<z_2^k,r_2^k>
-        bet_n = d.Dot(r1) - tr1.Dot(r1) + z2.Dot(r2)
+        bet_n = d.Dot(r1)[0] - tr1.Dot(r1)[0] + z2.Dot(r2)[0]
 
         if k == 0:
             bet = 0.
@@ -113,12 +113,12 @@ def bpcg(H, B, Fx, Fy, Qh, Qs, x, y, prec, maxit, show):
 
         # w = [Qh^{-1}q1  ; B'Qh^{-1}q1 -q2 ]
         w1.Multiply(1., Qh, q1, 0.)
-        #w2 = B.T*w1-q2
+        # w2 = B.T*w1-q2
         B.Multiply(True, w1, w2)
         w2.Update(-1., q2, 1.)
 
         # alpha_k^d = <w_1,s^k>-<q_1,p_1^k> + <w_2,p_2^k>
-        alp_d = w1.Dot(s) - q1.Dot(p1) + w2.Dot(p2)
+        alp_d = w1.Dot(s)[0] - q1.Dot(p1)[0] + w2.Dot(p2)[0]
 
         # alpha_k = beta^n_k / alpha_k^d
         alp = bet_n / alp_d

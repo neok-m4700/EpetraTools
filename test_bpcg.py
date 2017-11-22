@@ -61,7 +61,7 @@ B = scipy_csr_matrix2CrsMatrix(Bs, mycomm)
 Qh = Epetra.Vector(H.DomainMap())
 copy_vec(Qh, 2. / (Hs.diagonal()))
 
-# buld Qs diagonal precond
+# build Qs diagonal precond
 # mpc=load_vec("mpc.mat.npz")
 m_dic_mat = scipy.io.loadmat('mpc.mat')
 mpc = m_dic_mat['mpc'][:, 0]
@@ -72,7 +72,7 @@ vx = Epetra.Vector(H.DomainMap())
 vy = Epetra.Vector(B.DomainMap())
 
 # build RHS
-#f = load_vec("F.mat.npz")
+# f = load_vec("F.mat.npz")
 F_mat = scipy.io.loadmat('F.mat')
 f = F_mat['F']
 Fx = Epetra.Vector(H.RangeMap())
